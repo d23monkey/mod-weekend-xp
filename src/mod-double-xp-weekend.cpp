@@ -12,7 +12,7 @@ class DoubleXpWeekend : public PlayerScript
 public:
     DoubleXpWeekend() : PlayerScript("DoubleXpWeekend") {}
 
-        void OnLogin(Player* player)
+        void OnLogin(Player* player) override
         {
             // Announce to the player that the XP weekend is happeneing.
             if (!Enabled)
