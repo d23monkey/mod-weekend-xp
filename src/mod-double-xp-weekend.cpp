@@ -26,7 +26,7 @@ public:
                 ChatHandler(player->GetSession()).PSendSysMessage("XPWeekend Module is enabled");
         }
 
-        void OnGiveXP(Player* /*p*/, uint32& amount, Unit* victim) override
+        void OnGiveXP(Player* /*p*/, uint32& amount, Unit* /*victim*/) override
         {
             if (!Enabled)
                 return;
