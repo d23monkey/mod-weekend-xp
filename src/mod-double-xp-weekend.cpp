@@ -1,6 +1,7 @@
 #include "Configuration/Config.h"
 #include "ScriptMgr.h"
 #include "Player.h"
+#include "Chat.h"
 #include <time.h>
 
 bool Enabled;
