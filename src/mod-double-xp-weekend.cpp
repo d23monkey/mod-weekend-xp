@@ -1,6 +1,6 @@
 #include "Configuration/Config.h"
 #include "ScriptMgr.h"
-#inclunde "Player.h"
+#include "Player.h"
 #include <time.h>
 
 bool Enabled;
