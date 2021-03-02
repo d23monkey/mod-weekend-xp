@@ -44,17 +44,6 @@ public:
     void OnBeforeConfigLoad(bool reload) override
     {
         if (!reload) {
-            std::string conf_path = _CONF_DIR;
-            std::string cfg_file = conf_path + "/mod-double-xp-weekend.conf";
-
-#ifdef WIN32
-            cfg_file = "mod-double-xp-weekend.conf";
-#endif
-
-            std::string cfg_def_file = cfg_file + ".dist";
-            sConfigMgr->LoadMore(cfg_def_file.c_str());
-            sConfigMgr->LoadMore(cfg_file.c_str());
-
             Enabled = sConfigMgr->GetBoolDefault("XPWeekend.Enabled", true);
             xpAmount = sConfigMgr->GetIntDefault("XPWeekend.xpAmount", 2);
 
