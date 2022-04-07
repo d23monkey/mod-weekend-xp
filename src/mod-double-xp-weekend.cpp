@@ -60,13 +60,7 @@ public:
 
     void OnLogin(Player* player) override
     {
-        // Announce to the player that the XP weekend is happeneing.
-        if (!sConfigMgr->GetOption<bool>("XPWeekend.Announce", false))
-        {
-            return;
-        }
-
-        if (IsEventActive())
+        if (sConfigMgr->GetOption<bool>("XPWeekend.Announce", false) && IsEventActive())
         {
             ChatHandler(player->GetSession()).PSendSysMessage("Its the Weekend! Your XP rate has been set to: %u", GetExperienceRate(player));
         }
@@ -79,12 +73,7 @@ public:
 
     void OnGiveXP(Player* player, uint32& amount, Unit* /*victim*/) override
     {
-        if (!sConfigMgr->GetOption<bool>("XPWeekend.Enabled", false))
-        {
-            return;
-        };
-
-        if (IsEventActive())
+        if (sConfigMgr->GetOption<bool>("XPWeekend.Enabled", false) && IsEventActive())
         {
             amount *= GetExperienceRate(player);
         }
