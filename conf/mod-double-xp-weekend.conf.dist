@@ -39,3 +39,10 @@ XPWeekend.MaxAllowedRate = 2
 #
 
 XPWeekend.AlwaysEnabled = 0
+
+# XPWeekend.QuestOnly
+#     Restricts the experience bonus to quest rewards only.
+#     Default: 0 (Disabled, both creatures and quests are affected)
+#
+
+XPWeekend.QuestOnly = 1

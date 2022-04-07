@@ -71,10 +71,15 @@ public:
     }
            
 
-    void OnGiveXP(Player* player, uint32& amount, Unit* /*victim*/) override
+    void OnGiveXP(Player* player, uint32& amount, Unit* victim) override
     {
         if (sConfigMgr->GetOption<bool>("XPWeekend.Enabled", false) && IsEventActive())
         {
+            if (!sConfigMgr->GetOption<bool>("XPWeekend.QuestOnly", false) && victim)
+            {
+                return;
+            }
+
             amount *= GetExperienceRate(player);
         }
     }
