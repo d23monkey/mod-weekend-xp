@@ -75,7 +75,7 @@ public:
     {
         if (sConfigMgr->GetOption<bool>("XPWeekend.Enabled", false) && IsEventActive())
         {
-            if (!sConfigMgr->GetOption<bool>("XPWeekend.QuestOnly", false) && victim)
+            if (sConfigMgr->GetOption<bool>("XPWeekend.QuestOnly", false) && victim)
             {
                 return;
             }
