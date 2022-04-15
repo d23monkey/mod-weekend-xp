@@ -4,56 +4,116 @@
 #include "Chat.h"
 #include <time.h>
 
-bool Enabled;
-uint32 xpAmount;
-time_t t = time(NULL);
-tm *now = localtime(&t);
+using namespace Acore::ChatCommands;
+
+enum WeekendXP
+{
+    SETTING_WEEKEND_XP_RATE = 0,
+
+    LANG_CMD_WEEKEND_XP_SET   = 11120,
+    LANG_CMD_WEEKEND_XP_ERROR = 11121,
+
+    WD_FRIDAY   = 5,
+    WD_SATURDAY = 6,
+    WD_SUNDAY   = 0
+};
+
+class weekendxp_commandscript : public CommandScript
+{
+public:
+    weekendxp_commandscript() : CommandScript("weekendxp_commandscript") { }
+
+    ChatCommandTable GetCommands() const override
+    {
+        static ChatCommandTable commandTable =
+        {
+            { "weekendxp rate", HandleSetXPBonusCommand, SEC_PLAYER, Console::No },
+        };
+
+        return commandTable;
+    }
+
+    static bool HandleSetXPBonusCommand(ChatHandler* handler, int8 rate)
+    {
+        Player* player = handler->GetPlayer();
+
+        int8 maxRate = sConfigMgr->GetOption<int8>("XPWeekend.MaxAllowedRate", 2);
+
+        if (!rate || rate > maxRate)
+        {
+            handler->PSendSysMessage(LANG_CMD_WEEKEND_XP_ERROR, maxRate);
+            handler->SetSentErrorMessage(true);
+            return true;
+        }
+
+        player->UpdatePlayerSetting("mod-double-xp-weekend", SETTING_WEEKEND_XP_RATE, rate);
+        handler->PSendSysMessage(LANG_CMD_WEEKEND_XP_SET, rate);
+
+        return true;
+    }
+};
 
 class DoubleXpWeekend : public PlayerScript
 {
 public:
-    DoubleXpWeekend() : PlayerScript("DoubleXpWeekend") {}
+    DoubleXpWeekend() : PlayerScript("DoubleXpWeekend") { }
 
-        void OnLogin(Player* player) override
-        {
-            // Announce to the player that the XP weekend is happeneing.
-            if (!Enabled)
-                return;
-
-            if (now->tm_wday == 5 /*Friday*/ || now->tm_wday == 6 /*Satureday*/ || now->tm_wday == 0/*Sunday*/)
-                ChatHandler(player->GetSession()).PSendSysMessage("Its the Weekend! Your XP rate has been set to: %u", xpAmount);
-            else
-                ChatHandler(player->GetSession()).PSendSysMessage("This server is running the |cff4CFF00Double Xp Weekend |rmodule.");
-        }
-
-        void OnGiveXP(Player* /*p*/, uint32& amount, Unit* /*victim*/) override
-        {
-            if (!Enabled)
-                return;
-
-            if (now->tm_wday == 5 /*Friday*/ || now->tm_wday == 6 /*Satureday*/ || now->tm_wday == 0/*Sunday*/)
-                amount *= xpAmount;
-        }
-};
-
-class DoubleXpWeekendConf : public WorldScript
-{
-public:
-    DoubleXpWeekendConf() : WorldScript("DoubleXpConf") {}
-
-    void OnBeforeConfigLoad(bool reload) override
+    void OnLogin(Player* player) override
     {
-        if (!reload) {
-            Enabled = sConfigMgr->GetBoolDefault("XPWeekend.Enabled", true);
-            xpAmount = sConfigMgr->GetIntDefault("XPWeekend.xpAmount", 2);
-
+        if (sConfigMgr->GetOption<bool>("XPWeekend.Announce", false) && IsEventActive())
+        {
+            ChatHandler(player->GetSession()).PSendSysMessage("Its the Weekend! Your XP rate has been set to: %u", GetExperienceRate(player));
         }
+        else
+        {
+            ChatHandler(player->GetSession()).PSendSysMessage("This server is running the |cff4CFF00Double Xp Weekend |rmodule.");
+        }
+    }
+           
+
+    void OnGiveXP(Player* player, uint32& amount, Unit* victim) override
+    {
+        if (sConfigMgr->GetOption<bool>("XPWeekend.Enabled", false) && IsEventActive())
+        {
+            if (sConfigMgr->GetOption<bool>("XPWeekend.QuestOnly", false) && victim)
+            {
+                return;
+            }
+
+            amount *= GetExperienceRate(player);
+        }
+    }
+
+    int8 GetExperienceRate(Player * player) const
+    {
+        int8 rate = sConfigMgr->GetOption<int8>("XPWeekend.xpAmount", 2);
+
+        int8 individualRate = player->GetPlayerSetting("mod-double-xp-weekend", SETTING_WEEKEND_XP_RATE).value;
+
+        // If individualxp setting is enabled... and a rate was set, overwrite it.
+        if (sConfigMgr->GetOption<bool>("XPWeekend.IndividualXPEnabled", false) && individualRate)
+        {
+            rate = individualRate;
+        }
+
+        // Prevent returning 0% rate.
+        return rate ? rate : 1;
+    }
+
+    bool IsEventActive() const
+    {
+        if (sConfigMgr->GetOption<bool>("XPWeekend.AlwaysEnabled", false))
+            return true;
+
+        time_t t = time(nullptr);
+        tm* now = localtime(&t);
+
+        return now->tm_wday == WD_FRIDAY || now->tm_wday == WD_SATURDAY || now->tm_wday == WD_SUNDAY;
     }
 };
 
-
 void AdddoublexpScripts()
 {
-    new DoubleXpWeekendConf();
     new DoubleXpWeekend();
+    new weekendxp_commandscript();
 }
