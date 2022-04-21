@@ -60,13 +60,16 @@ public:
 
     void OnLogin(Player* player) override
     {
-        if (sConfigMgr->GetOption<bool>("XPWeekend.Announce", false) && IsEventActive())
+        if (sConfigMgr->GetOption<bool>("XPWeekend.Announce", false))
         {
-            ChatHandler(player->GetSession()).PSendSysMessage("Its the Weekend! Your XP rate has been set to: %u", GetExperienceRate(player));
-        }
-        else
-        {
-            ChatHandler(player->GetSession()).PSendSysMessage("This server is running the |cff4CFF00Double Xp Weekend |rmodule.");
+            if (IsEventActive())
+            {
+                ChatHandler(player->GetSession()).PSendSysMessage("Its the Weekend! Your XP rate has been set to: %u", GetExperienceRate(player));
+            }
+            else
+            {
+                ChatHandler(player->GetSession()).PSendSysMessage("This server is running the |cff4CFF00Double Xp Weekend |rmodule.");
+            }
         }
     }
            
