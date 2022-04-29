@@ -76,7 +76,7 @@ public:
 
     void OnGiveXP(Player* player, uint32& amount, Unit* victim) override
     {
-        if (sConfigMgr->GetOption<bool>("XPWeekend.Enabled", false) && IsEventActive())
+        if (IsEventActive())
         {
             if (sConfigMgr->GetOption<bool>("XPWeekend.QuestOnly", false) && victim)
             {
@@ -107,6 +107,9 @@ public:
     {
         if (sConfigMgr->GetOption<bool>("XPWeekend.AlwaysEnabled", false))
             return true;
+            
+        if (!sConfigMgr->GetOption<bool>("XPWeekend.Enabled", false))
+            return false;
 
         time_t t = time(nullptr);
         tm* now = localtime(&t);
