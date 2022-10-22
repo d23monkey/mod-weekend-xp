@@ -46,3 +46,10 @@ XPWeekend.AlwaysEnabled = 0
 #
 
 XPWeekend.QuestOnly = 0
+
+# XPWeekend.MaxLevel = 80
+#     Restricts the experience bonus to characters of a certain level.
+#     Characters with a higher level than this will not receive any bonus experience.
+#
+
+XPWeekend.MaxLevel = 80
