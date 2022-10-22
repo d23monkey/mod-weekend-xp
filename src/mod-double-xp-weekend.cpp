@@ -83,6 +83,11 @@ public:
                 return;
             }
 
+            if (player->getLevel() >= sConfigMgr->GetOption<uint32>("XPWeekend.MaxLevel", 80))
+            {
+                return;
+            }
+
             amount *= GetExperienceRate(player);
         }
     }
