@@ -9,13 +9,14 @@ using namespace Acore::ChatCommands;
 enum WeekendXP
 {
     SETTING_WEEKEND_XP_RATE = 0,
+    SETTING_WEEKEND_XP_DISABLE = 1,
 
     LANG_CMD_WEEKEND_XP_SET   = 11120,
     LANG_CMD_WEEKEND_XP_ERROR = 11121,
 
     WD_FRIDAY   = 5,
     WD_SATURDAY = 6,
-    WD_SUNDAY   = 0
+    WD_SUNDAY   = 0,
 };
 
 class weekendxp_commandscript : public CommandScript
@@ -97,6 +98,11 @@ public:
         int8 rate = sConfigMgr->GetOption<int8>("XPWeekend.xpAmount", 2);
 
         int8 individualRate = player->GetPlayerSetting("mod-double-xp-weekend", SETTING_WEEKEND_XP_RATE).value;
+
+        if (player->GetPlayerSetting("mod-double-xp-weekend", SETTING_WEEKEND_XP_DISABLE).value)
+        {
+            return 1;
+        }
 
         // If individualxp setting is enabled... and a rate was set, overwrite it.
         if (sConfigMgr->GetOption<bool>("XPWeekend.IndividualXPEnabled", false) && individualRate)
