@@ -77,20 +77,22 @@ public:
 
     void OnGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource) override
     {
-        if (IsEventActive())
+        if (!IsEventActive())
         {
-            if (sConfigMgr->GetOption<bool>("XPWeekend.QuestOnly", false) && victim && victim->GetTypeId() == TYPEID_UNIT && !victim->ToCreature()->hasLootRecipient())
-            {
-                return;
-            }
-
-            if (player->getLevel() >= sConfigMgr->GetOption<uint32>("XPWeekend.MaxLevel", 80))
-            {
-                return;
-            }
-
-            amount *= GetExperienceRate(player);
+            return;
         }
+
+        if (sConfigMgr->GetOption<bool>("XPWeekend.QuestOnly", false) && victim && victim->GetTypeId() == TYPEID_UNIT && !victim->ToCreature()->hasLootRecipient())
+        {
+            return;
+        }
+
+        if (player->getLevel() >= sConfigMgr->GetOption<uint32>("XPWeekend.MaxLevel", 80))
+        {
+            return;
+        }
+
+        amount *= GetExperienceRate(player);
     }
 
     int8 GetExperienceRate(Player * player) const
