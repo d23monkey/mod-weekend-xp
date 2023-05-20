@@ -40,7 +40,7 @@ public:
 
         int8 maxRate = sConfigMgr->GetOption<int8>("XPWeekend.MaxAllowedRate", 2);
 
-        if (!rate || rate > maxRate)
+        if (rate <= 0 || rate > maxRate)
         {
             handler->PSendSysMessage(LANG_CMD_WEEKEND_XP_ERROR, maxRate);
             handler->SetSentErrorMessage(true);
