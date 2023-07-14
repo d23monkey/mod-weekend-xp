@@ -67,7 +67,7 @@ public:
             {
                 ChatHandler(player->GetSession()).PSendSysMessage("It's the weekend! Your XP rate has been set to: %u", GetExperienceRate(player));
             }
-            else if (IsEventActive() && sConfigMgr->GetOption<bool>("XPWeekend.AlwaysEnabled", false)
+            else if (IsEventActive() && sConfigMgr->GetOption<bool>("XPWeekend.AlwaysEnabled", false))
             {
                 ChatHandler(player->GetSession()).PSendSysMessage("Your XP rate has been set to: %u", GetExperienceRate(player));
             }
