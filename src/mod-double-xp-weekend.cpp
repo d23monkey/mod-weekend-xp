@@ -77,7 +77,6 @@ public:
             }
         }
     }
-           
 
     void OnGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource) override
     {
@@ -86,7 +85,7 @@ public:
             return;
         }
 
-        if (sConfigMgr->GetOption<bool>("XPWeekend.QuestOnly", false) && xpSource != PlayerXPSource::XPSOURCE_QUEST)
+        if (sConfigMgr->GetOption<bool>("XPWeekend.QuestOnly", false) && xpSource != PlayerXPSource::XPSOURCE_QUEST && xpSource != PlayerXPSource::XPSOURCE_QUEST_DF)
         {
             return;
         }
