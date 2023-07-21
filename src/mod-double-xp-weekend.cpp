@@ -79,14 +79,14 @@ public:
     }
            
 
-    void OnGiveXP(Player* player, uint32& amount, Unit* victim, uint8 /*xpSource*/) override
+    void OnGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource) override
     {
         if (!IsEventActive())
         {
             return;
         }
 
-        if (sConfigMgr->GetOption<bool>("XPWeekend.QuestOnly", false) && victim && victim->GetTypeId() == TYPEID_UNIT && !victim->ToCreature()->hasLootRecipient())
+        if (sConfigMgr->GetOption<bool>("XPWeekend.QuestOnly", false) && xpSource != PlayerXPSource::XPSOURCE_QUEST)
         {
             return;
         }
