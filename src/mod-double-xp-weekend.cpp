@@ -85,7 +85,7 @@ public:
         {
             return;
         }
-
+        
         if (sConfigMgr->GetOption<bool>("XPWeekend.QuestOnly", false) && xpSource != PlayerXPSource::XPSOURCE_QUEST)
         {
             return;
