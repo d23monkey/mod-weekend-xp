@@ -77,7 +77,7 @@ public:
             }
         }
     }
-    
+
     void OnGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource) override
     {
         if (!IsEventActive())
