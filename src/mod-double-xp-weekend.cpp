@@ -65,11 +65,11 @@ public:
         {
             if (IsEventActive() && !sConfigMgr->GetOption<bool>("XPWeekend.AlwaysEnabled", false))
             {
-                ChatHandler(player->GetSession()).PSendSysMessage("It's the weekend! Your XP rate has been set to: %u", GetExperienceRate(player));
+                ChatHandler(player->GetSession()).PSendSysMessage("It's the weekend! Your XP rate has been set to: {}", GetExperienceRate(player));
             }
             else if (IsEventActive() && sConfigMgr->GetOption<bool>("XPWeekend.AlwaysEnabled", false))
             {
-                ChatHandler(player->GetSession()).PSendSysMessage("Your XP rate has been set to: %u", GetExperienceRate(player));
+                ChatHandler(player->GetSession()).PSendSysMessage("Your XP rate has been set to: {}", GetExperienceRate(player));
             }
             else
             {
@@ -90,7 +90,7 @@ public:
             return;
         }
 
-        if (player->getLevel() >= sConfigMgr->GetOption<uint32>("XPWeekend.MaxLevel", 80))
+        if (player->GetLevel() >= sConfigMgr->GetOption<uint32>("XPWeekend.MaxLevel", 80))
         {
             return;
         }
