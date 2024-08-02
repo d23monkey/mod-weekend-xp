@@ -10,6 +10,7 @@ enum WeekendXP
 {
     SETTING_WEEKEND_XP_RATE = 0,
     SETTING_WEEKEND_XP_DISABLE = 1,
+    SETTING_WEEKEND_XP_VERSION = 2,
 
     LANG_CMD_WEEKEND_XP_SET   = 11120,
     LANG_CMD_WEEKEND_XP_ERROR = 11121,
@@ -25,6 +26,19 @@ class DoubleXpWeekend
 
 public:
 
+    // - CHANGELOG -
+    // Version 1:
+    // * Now rates are handled as `float`s as opposed to `uint32`. The SETTING_WEEKEND_XP_RATE does technically
+    //   store an `uint32`, but we are just storing a float in there, hence the hacky reinterpreting code you see around
+    // * Introduced command `.weekendxp config`. The mod is already confusing as it is, and without knowing the currently
+    //   running configuration file, players have no way to know what is going on with the xp rate. This command should
+    //   help with that
+    // * Moved all the mod-related logic to it's own class, accessible through `DoubleXpWeekend* DoubleXpWeekend::instance()`.
+    //   That way both the `CommandScript` and the `PlayerScript` can rely on the same logic.
+    // * Introduced the concept of migrations, since different versions of the mod (like this one), might change how things
+    //   work, and some persistent data might need to be changed in some way. For now this only migrates the player settings
+    //   on login.
+    
     DoubleXpWeekend() { }
     
     // NOTE We need to access the DoubleXpWeekend logic from other
@@ -60,6 +74,11 @@ public:
 
     void OnLogin(Player* player, ChatHandler* handler) const
     {
+        // TODO I am assuming that this is always called when a character logs in...
+        // if that is not the case, thing migh get weird... Adding some asserts or warnings would be nice
+        // but I'm not sure how to handle "This shouldn't be happening but it is" kind of scenarios in acore
+        MigratePlayerSettings(player, handler);
+
         if (ConfigAnnounce())
         {
             if (IsEventActive() && !ConfigAlwaysEnabled())
@@ -97,6 +116,9 @@ public:
 
         PlayerSettingSetRate(player, rate);
         handler->PSendSysMessage(LANG_CMD_WEEKEND_XP_SET, rate);
+
+        // TODO if the `EnablePlayerSettings` is not set, the setting wont be remembered by the
+        // server after the player logs out, meaning the player needs to do this again on next login
 
         return true;
     }
@@ -144,23 +166,58 @@ private:
 
     void PlayerSettingSetRate(Player* player, float rate) const
     {
-        // HACK PlayerSetting seems to store uint32 only, so save our `float`
-        // as if it was a `uint32`, and when getting it back use the same trick.
-        // This **should** be fine (?) as long as `PlayerSetting::value` is a `uint32` and rate a `float`
-        uint32 rateStorage;
-        memcpy(&rateStorage, &rate, sizeof(uint32));
-        player->UpdatePlayerSetting("mod-double-xp-weekend", SETTING_WEEKEND_XP_RATE, rateStorage);
+        // HACK PlayerSetting seems to store uint32 only, so save our `float` as if it was a `uint32`
+        uint32 encodedRate;
+        float* reinterpretingPointer = (float*)&encodedRate;
+        *reinterpretingPointer = rate;
+        player->UpdatePlayerSetting("mod-double-xp-weekend", SETTING_WEEKEND_XP_RATE, encodedRate);
     }
     
     float PlayerSettingGetRate(Player* player) const
     {
-        // HACK check `PlayerSettingSetRate` for context
         uint32 rateStored = player->GetPlayerSetting("mod-double-xp-weekend", SETTING_WEEKEND_XP_RATE).value;
-        if (rateStored == 0) return 0.0f;
-        
-        float rate;
-        memcpy(&rate, &rateStored, sizeof(uint32));
+        // HACK PlayerSetting seems to store uint32 only, so save our `float` as if it was a `uint32`
+        float rate = *(float*)&rateStored;
         return rate;
+    }
+
+    void MigratePlayerSettings(Player* player, ChatHandler* /*handler*/) const
+    {
+        static const uint32 VERSION = 1;
+
+        uint32 playersCurrentVersion = player->GetPlayerSetting("mod-double-xp-weekend", SETTING_WEEKEND_XP_VERSION).value;
+        bool validMigration = playersCurrentVersion == 0 && VERSION == 1;
+        if (!validMigration) 
+        {
+            // Currently there is only either version 0 (the default) or 1
+            // This check should never fail unless a new version is introduced and the
+            // migration here is not updated.
+            return;
+        }
+
+        // On version 1 the only thing to migrate is the SETTING_WEEKEND_XP_RATE
+        float newRate = ConfigxpAmount();
+        uint32 originalRate = player->GetPlayerSetting("mod-double-xp-weekend", SETTING_WEEKEND_XP_RATE).value;
+        if (originalRate <= 0)
+        {
+            // player setting was never set before, just use default
+        }
+        else if ((float)originalRate > ConfigMaxAllowedRate())
+        {
+            // player setting was set but the value is not valid, just use default
+        }                
+        else
+        {
+            // player setting was set, use the same rate
+            newRate = (float) originalRate;
+        }
+
+        // HACK PlayerSetting seems to store uint32 only, so save our `float` as if it was a `uint32`
+        uint32 encodedRate;
+        float* reinterpretingPointer = (float*)&encodedRate;
+        *reinterpretingPointer = newRate;
+        player->UpdatePlayerSetting("mod-double-xp-weekend", SETTING_WEEKEND_XP_RATE, encodedRate);
+        player->UpdatePlayerSetting("mod-double-xp-weekend", SETTING_WEEKEND_XP_VERSION, VERSION);
     }
     
     // TODO why is there a `GetDisable` player setting but no way to actually modify it? Leaving as is for now...
