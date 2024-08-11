@@ -25,19 +25,6 @@ class DoubleXpWeekend
 {
 
 public:
-
-    // - CHANGELOG -
-    // Version 1:
-    // * Now rates are handled as `float`s as opposed to `uint32`. The SETTING_WEEKEND_XP_RATE does technically
-    //   store an `uint32`, but we are just storing a float in there, hence the hacky reinterpreting code you see around
-    // * Introduced command `.weekendxp config`. The mod is already confusing as it is, and without knowing the currently
-    //   running configuration file, players have no way to know what is going on with the xp rate. This command should
-    //   help with that
-    // * Moved all the mod-related logic to it's own class, accessible through `DoubleXpWeekend* DoubleXpWeekend::instance()`.
-    //   That way both the `CommandScript` and the `PlayerScript` can rely on the same logic.
-    // * Introduced the concept of migrations, since different versions of the mod (like this one), might change how things
-    //   work, and some persistent data might need to be changed in some way. For now this only migrates the player settings
-    //   on login.
     
     DoubleXpWeekend() { }
     
@@ -84,9 +71,6 @@ public:
             if (IsEventActive() && !ConfigAlwaysEnabled())
             {
                 float rate = GetExperienceRate(player);
-                // TODO not sure why some strings were defined in SQL scripts and others (like these)
-                // are inlined here. Potentially we might want to move this to an SQL script as well
-                // (for consistency at least...)
                 handler->PSendSysMessage("It's the weekend! Your XP rate has been set to: {}", rate);
             }
             else if (IsEventActive() && ConfigAlwaysEnabled())
