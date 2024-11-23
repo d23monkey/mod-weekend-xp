@@ -71,16 +71,16 @@ public:
             if (IsEventActive() && !ConfigAlwaysEnabled())
             {
                 float rate = GetExperienceRate(player);
-                handler->PSendSysMessage("It's the weekend! Your XP rate has been set to: {}", rate);
+                handler->PSendSysMessage("周末到了！你的经验值倍率已被设置为: {}", rate);
             }
             else if (IsEventActive() && ConfigAlwaysEnabled())
             {
                 float rate = GetExperienceRate(player);
-                handler->PSendSysMessage("Your XP rate has been set to: {}", rate);
+                handler->PSendSysMessage("你的经验倍率已经设置为: {}", rate);
             }
             else
             {
-                handler->PSendSysMessage("This server is running the |cff4CFF00Double XP Weekend |rmodule.");
+                handler->PSendSysMessage("本服务正在运行 |cff4CFF00周末双倍经验 |r模块.");
             }
         }
     }
